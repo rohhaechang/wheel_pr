@@ -48,8 +48,8 @@ const Map = () => {
 
   const fetchData = async () => {
     try {
-      const res = await axios.get('/');
-      console.log(res);
+      const res = await axios.get('https://localhost:8080/');
+      console.log(res.data);
     } catch (e) {
       console.log(e);
     }
