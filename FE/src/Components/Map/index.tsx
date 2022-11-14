@@ -261,6 +261,7 @@ const Map = () => {
     finally {console.log('실행')}
   }
 
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -276,10 +277,15 @@ const Map = () => {
         array23[i] = response.v2.addresses[0];
       })
     }
+
   }
 
   const dfg = () => {
-    console.log(array23);
+    axios({
+      method: 'post',
+      url: '/api',
+      data: array23,
+    })
   }
 
   /** 지도 로딩 시(현재 위치 찾는 중)에 화면 렌더링 */
