@@ -1,7 +1,9 @@
 const express = require('express');
 const path = require('path');
 const app = express();
-const api = require('./api');
+const api1 = require('./api1');
+const api2 = require('./api2');
+const api3 = require('./api3');
 const bodyParser = require('body-parser');
 
 /** 클라이언트에서 받아오는 데이터의 양 늘리기 */
@@ -22,4 +24,6 @@ app.get('/', function(req, res) {
   res.sendFile(path.join(__dirname, './FE/build/index.html'));
 })
 
-app.use("/api", api);
+app.use("/api1", api1);
+app.use('/api2', api2);
+app.use('/api3', api3);

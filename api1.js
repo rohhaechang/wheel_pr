@@ -3,27 +3,20 @@ const sqlite3 = require('sqlite3').verbose();
 
 const router = express.Router();
 
-let sql = `SELECT addr FROM data2`;
-
-let array = [];
+let data1 = `SELECT * FROM data1`;
 
 let db = new sqlite3.Database('./db/sample.db', (err) => {
   if(err) {
     console.log(err.message);
   }
-  db.all(sql, [], (err, rows) => {
+  db.all(data1, [], (err, rows) => {
     if(err) {
       throw err;
     }
-    array = rows;
     router.get("/", (req, res) => {
       res.send(rows);
     })
   })
-})
-
-router.post('/', (req, res) => {
-  console.log('post');
 })
 
 module.exports = router;

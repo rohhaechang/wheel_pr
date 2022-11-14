@@ -1,4 +1,4 @@
-import React, {useEffect, useReducer, useRef, useState, useContext, useCallback} from 'react';
+import React, {useEffect, useRef, useState, useContext} from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
 
@@ -6,46 +6,7 @@ import { Button } from './Button';
 import { Input } from './Input';
 import Side from './Side';
 import { SideContext } from '../../Contexts/Side';
-
-/** 공공데이터 reducer 타입 */
-type Action = 
-  | { type: 'LOADING';}
-  | { type: 'SUCCESS'; data: JSON;}
-  | { type: 'ERROR' ; error: string | unknown}
-
-/** 공공데이터 state 타입 */
-type State = 
-  {loading: any; data: any; error: any}
-; 
-
-/** 공공데이터를 가져올 때 사용할 reducer */
-const reducer = (state: any, action: Action) => {
-  switch (action.type) {
-    case 'LOADING':
-      return {
-        loading: true,
-        data: null,
-        error: null,
-      };
-    case 'SUCCESS':
-      return {
-        loading: false,
-        data: action.data,
-        error: null,
-      }
-    case 'ERROR':
-      return {
-        loading: false,
-        data: null,
-        error: action.error,
-      }
-    default: 
-      throw new Error(`unhandled error`);
-  }
-}
-
-  let array12: any = [];
-  let array23: any = [];
+import { PublicDataContext } from '../../Contexts/publicData';
 
 const Map = () => {
 
@@ -55,37 +16,18 @@ const Map = () => {
   const [search, setSearch] = useState(``);
   /** 검색 좌표 */
   const [searchCoord, setSearchCoord] = useState<{x: number; y: number} | string>(``);
-
-  /* 공공데이터 상태 */
-  const [state1, dispatch1] = useReducer(reducer, {
-    loading: false,
-    data: null,
-    error: null,
-  })
-
-  const [state2, dispatch2] = useReducer(reducer, {
-    loading: false,
-    data: null,
-    error: null,
-  })
-
-  const [state3, dispatch3] = useReducer(reducer, {
-    loading: false,
-    data: null,
-    error: null,
-  })
-
+  /** side에서 시작하는 전역 상태 */
   const {select} = useContext(SideContext);
-
-  let dataArray1: any = [];
-  let dataArray2: any = [];
-  let dataArray3: any = [];
-
+  /** 공공데이터를 담은 전역 상태 */
+  const {data1, data2, data3, changeData1, changeData2, changeData3} = useContext(PublicDataContext);
   /** 지도를 담은 ref 객체 */
   const mapElement = useRef<HTMLElement | null | any>(null);
-
-  /** 지도의 마커를 담은 ref 객체 */
+  /** 지도의 처음, 검색 시 마커를 담은 ref 객체 */
   const markerRef = useRef<any | null>(null);
+  /** 데이터의 마커를 담은 ref 객체 */
+  const dataMarkerRef = useRef<any | null>(null);
+  /** 선택된 마커를 담은 ref 객체 */
+  const selectedMarker = useRef<any | null>(null);
 
   /** 주소 검색 */
   const searchAddress = async () => {
@@ -98,6 +40,23 @@ const Map = () => {
       // 지도 위치 검색 좌표로 이동
       mapElement.current.panTo(new naver.maps.LatLng(Number(response.v2.addresses[0].y), Number(response.v2.addresses[0].x)));
       setSearchCoord({x: Number(response.v2.addresses[0].y), y: Number(response.v2.addresses[0].x)});
+      // 검색 위치 마커 생성
+      // 이전의 마커를 안 보이게
+      markerRef.current.setMap(null);
+      markerRef.current = new naver.maps.Marker({
+        position: new naver.maps.LatLng(Number(response.v2.addresses[0].y), Number(response.v2.addresses[0].x)),
+        map: mapElement.current,
+      })
+      naver.maps.Event.addListener(markerRef.current, 'click', () => {
+        const mapLatLng = new naver.maps.LatLng(Number(response.v2.addresses[0].y), Number(response.v2.addresses[0].x));
+        mapElement.current.panTo(mapLatLng, {duration: 400});
+      })
+      setSelectedMarker(markerRef.current);
+      let infowindow = new naver.maps.InfoWindow({
+        content: search,
+        disableAnchor: true,
+      })
+      infowindow.open(mapElement.current, markerRef.current);
     })
   }
 
@@ -116,47 +75,6 @@ const Map = () => {
       longitude: 127.0276188,
     })
   }
-
-  /** 선택한 공공데이터에 따른 데이터 배열 생성 */
-  const createArray = useCallback((state: State, a: number) => {
-    if(a === 1) {
-      for(let i=0; i<10; i++) {
-        naver.maps.Service.geocode({
-          query: state.data.viewAmenitiesInfo.row[i].ADDR
-        }, function (status, response) {
-          if(status === naver.maps.Service.Status.ERROR) {
-            console.log('오류');
-          }
-          dataArray1[i] = response.v2.addresses[0];
-        })
-      }
-      console.log(dataArray1);
-    }
-    if(a === 2) {
-      for(let i=0; i<10; i++) {
-        naver.maps.Service.geocode({
-          query: state.data.stayLodgeInfo.row[i].ADDR
-        }, function (status, response) {
-          if(status === naver.maps.Service.Status.ERROR) {
-            console.log('오류');
-          }
-          dataArray2[i] = response.v2.addresses[0];
-        })
-      }
-    }
-    if(a === 3) {
-      for(let i=0; i<10; i++) {
-        naver.maps.Service.geocode({
-          query: state.data.touristFoodInfo.row[i].ADDR
-        }, function (status, response) {
-          if(status === naver.maps.Service.Status.ERROR) {
-            console.log('오류');
-          }
-          dataArray3[i] = response.v2.addresses[0];
-        })
-      }
-    }
-  }, []);
 
   /** 현재 위치를 추적 */
   useEffect(() => {
@@ -180,7 +98,7 @@ const Map = () => {
       console.log('지도 호출');
   }, [mapElement, myLocation]);
 
-  /* 마커 생성 */
+  /* 최초 위치 마커 생성 */
   useEffect(() => {
     if(typeof myLocation !== 'string'){
       markerRef.current = new naver.maps.Marker({
@@ -192,101 +110,139 @@ const Map = () => {
         const mapLatLng = new naver.maps.LatLng(myLocation.latitude, myLocation.longitude);
         mapElement.current.panTo(mapLatLng, {duration: 400});
       })
+      setSelectedMarker(markerRef.current);
     }
   }, [myLocation]);
 
-  /* 공공데이터 가져오기 */
+  /** 선택된 마커에 하이라이트를 주는 함수 - 실행 안 됨*/
+  function setSelectedMarker(marker: any) {
+  naver.maps.Event.addListener(marker, 'click', (e: any) => {
+    if(!selectedMarker.current ||(selectedMarker.current !== marker)) {
+      if(!!selectedMarker.current) {
+        selectedMarker.current.setIcon({
+        url: '../../asset/markericon.png',
+        size: new naver.maps.Size(50, 58),
+        origin: new naver.maps.Point(0, 0),
+        anchor: new naver.maps.Point(25, 58),
+        })
+      }
+      marker.setIcon({
+        url: '../../asset/markericon.png',
+        size: new naver.maps.Size(50, 58),
+        origin: new naver.maps.Point(0, 0),
+        anchor: new naver.maps.Point(25, 58),
+      })
+      selectedMarker.current = marker
+    }
+  })
+  }
+
+  /** select(전역 변수) 변화 시 마커 생성 */
+  const selectMarker = (a: number | undefined) => {
+    if(a !== undefined) {
+      if(a === 1) {
+        data1.map((element: any) => {
+          if(element.y !== null && element.x !== null) {
+            dataMarkerRef.current = new naver.maps.Marker({
+              position: new naver.maps.LatLng(Number(element.y), Number(element.x)),
+              map: mapElement.current,
+            })
+            naver.maps.Event.addListener(dataMarkerRef.current, 'click', () => {
+              const mapLatLng = new naver.maps.LatLng(Number(element.y), Number(element.x));
+              mapElement.current.panTo(mapLatLng, {duration: 400});
+            })
+            setSelectedMarker(dataMarkerRef.current);
+            element.marker = dataMarkerRef.current;
+          }
+          else {
+            console.log('데이터 없음')
+          }
+        })
+      }
+      if(a === 2) {
+        data2.map((element: any) => {
+          if(element.y !== null && element.x !== null) {
+            dataMarkerRef.current = new naver.maps.Marker({
+              position: new naver.maps.LatLng(Number(element.y), Number(element.x)),
+              map: mapElement.current,
+            })
+            naver.maps.Event.addListener(dataMarkerRef.current, 'click', () => {
+              const mapLatLng = new naver.maps.LatLng(Number(element.y), Number(element.x));
+              mapElement.current.panTo(mapLatLng, {duration: 400});
+            })
+            setSelectedMarker(dataMarkerRef.current);
+            element.marker = dataMarkerRef.current;
+          }
+          else {
+            console.log('데이터 없음')
+          }
+        })
+      }
+      if(a === 3) {
+        data3.map((element: any) => {
+          if(element.y !== null && element.x !== null){
+            dataMarkerRef.current = new naver.maps.Marker({
+              position: new naver.maps.LatLng(Number(element.y), Number(element.x)),
+              map: mapElement.current,
+            })
+            naver.maps.Event.addListener(dataMarkerRef.current, 'click', () => {
+              const mapLatLng = new naver.maps.LatLng(Number(element.y), Number(element.x));
+              mapElement.current.panTo(mapLatLng, {duration: 400});
+            })
+            setSelectedMarker(dataMarkerRef.current);
+            element.marker = dataMarkerRef.current;
+          }
+          else {
+            console.log('데이터 없음')
+          }
+        })
+      }    
+    }
+    else console.log('오류');
+  }
+
   useEffect(() => {
-    const fetchUsers1 = async () => {
-      dispatch1({ type: 'LOADING' });
-      try {
-        const response = await axios.get(
-          `http://openapi.seoul.go.kr:8088/486857594b726863383574794f4669/json/viewAmenitiesInfo/1/900/`
-        );
-        dispatch1({ type: 'SUCCESS', data: response.data });
-      } catch (e) {
-        dispatch1({ type: 'ERROR', error: e});
-      }
-    }
-    const fetchUsers2 = async () => {
-      dispatch2({ type: 'LOADING' });
-      try {
-        const response = await axios.get(
-          `http://openapi.seoul.go.kr:8088/486857594b726863383574794f4669/json/stayLodgeInfo/1/280/`
-        );
-        dispatch2({ type: 'SUCCESS', data: response.data });
-      } catch (e) {
-        dispatch2({ type: 'ERROR', error: e});
-      }
-    }
-    const fetchUsers3 = async () => {
-      dispatch3({ type: 'LOADING' });
-      try {
-        const response = await axios.get(
-          `http://openapi.seoul.go.kr:8088/486857594b726863383574794f4669/json/touristFoodInfo/1/150/`
-        );
-        dispatch3({ type: 'SUCCESS', data: response.data });
-      } catch (e) {
-        dispatch3({ type: 'ERROR', error: e});
-      }
-    }
-    fetchUsers1();
-    fetchUsers2();
-    fetchUsers3();
-  }, []);
+    selectMarker(select);
+  }, [select]);
 
-  /** select에 따른 데이터 배열 생성 */
-  useEffect(() => {
-    if(select === 1) {
-      createArray(state1, 1);
-    }
-    if(select === 2) {
-      createArray(state2, 2);
-    }
-    if(select === 3) {
-      createArray(state3, 3);
-    }
-  }, [select, state1, state2, state3, createArray])
+  // const postData = () => {
+  //   for(let i=0; i<array12.length; i++) {
+  //     naver.maps.Service.geocode({
+  //       query: array12[i].addr
+  //     }, function(status, response) {
+  //       if(status === naver.maps.Service.Status.ERROR) {
+  //         console.log('오류');
+  //       }
+  //       array23[i] = response.v2.addresses[0];
+  //     })
+  //   }
+  // }
 
+  /** 서버에서 공공데이터 받아오기 */
 
-  // 서버에서 데이터 받기
-  const fetchData = async () => {
+  const getData = async (a?: string) => {
     try {
-      const res = await axios.get('/api');
-      array12 = res.data;
-      console.log(array12);
+      const res = await axios.get(`/api${a}`);
+      if(a === '1') {
+        changeData1(res.data);
+      }
+      if(a === '2') {
+        changeData2(res.data);
+      }
+      if(a === '3') {
+        changeData3(res.data);
+      }
     } catch (e) {
       console.log(e);
     }
-    finally {console.log('실행')}
   }
-
+  // ex) res.data[].x
 
   useEffect(() => {
-    fetchData();
+    getData('1');
+    getData('2');
+    getData('3');
   }, []);
-
-  const sdf = () => {
-    for(let i=0; i<array12.length; i++) {
-      naver.maps.Service.geocode({
-        query: array12[i].addr
-      }, function(status, response) {
-        if(status === naver.maps.Service.Status.ERROR) {
-          console.log('오류');
-        }
-        array23[i] = response.v2.addresses[0];
-      })
-    }
-
-  }
-
-  const dfg = () => {
-    axios({
-      method: 'post',
-      url: '/api',
-      data: array23,
-    })
-  }
 
   /** 지도 로딩 시(현재 위치 찾는 중)에 화면 렌더링 */
   if(typeof myLocation === 'string') 
@@ -306,8 +262,6 @@ const Map = () => {
         <Button backgroundColor='beige' onClick={() => {
           searchAddress()
           }} />
-          <Button backgroundColor='beige' onClick={() => sdf()} />
-          <Button backgroundColor='beige' onClick={() => dfg()} />
       </SearchContainer>
       <MapContainer>
         <div id="map" style={{minHeight: '600px',}}></div>

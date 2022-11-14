@@ -4,10 +4,12 @@ import styled from 'styled-components';
 import { IconButton } from './IconButton';
 import DataList from './DataList';
 import { SideContext } from '../../../Contexts/Side';
+import { PublicDataContext } from '../../../Contexts/publicData';
 
 const Side = () => {
   const {select, changeSelect} = useContext(SideContext);
-
+  const {data1, data2, data3} = useContext(PublicDataContext);
+  if(select == 1)
   return (
     <Container>
       <IconContainer>
@@ -28,7 +30,82 @@ const Side = () => {
           }}/>
       </IconContainer>
       <ListContainer>
-        <DataList label={select}></DataList>
+        <DataList label={data1}></DataList>
+      </ListContainer>
+    </Container>
+  )
+  if(select === 2) 
+  return (
+    <Container>
+      <IconContainer>
+        <IconButton backgroundColor='beige' 
+          label='장애인 관광편의시설'
+          onClick={() => {
+            changeSelect(1)
+          }}/>
+        <IconButton backgroundColor='beige' 
+          label='장애인 관광숙박'
+          onClick={() => {
+            changeSelect(2)
+          }} />
+        <IconButton backgroundColor='beige' 
+          label='장애인 관광음식점'
+          onClick={() => {
+            changeSelect(3)
+          }}/>
+      </IconContainer>
+      <ListContainer>
+        <DataList label={data2}></DataList>
+      </ListContainer>
+    </Container>
+  )
+  if(select === 3)
+  return (
+    <Container>
+      <IconContainer>
+        <IconButton backgroundColor='beige' 
+          label='장애인 관광편의시설'
+          onClick={() => {
+            changeSelect(1)
+          }}/>
+        <IconButton backgroundColor='beige' 
+          label='장애인 관광숙박'
+          onClick={() => {
+            changeSelect(2)
+          }} />
+        <IconButton backgroundColor='beige' 
+          label='장애인 관광음식점'
+          onClick={() => {
+            changeSelect(3)
+          }}/>
+      </IconContainer>
+      <ListContainer>
+        <DataList label={data3}></DataList>
+      </ListContainer>
+    </Container>
+  )
+  
+  return (
+    <Container>
+      <IconContainer>
+        <IconButton backgroundColor='beige' 
+          label='장애인 관광편의시설'
+          onClick={() => {
+            changeSelect(1)
+          }}/>
+        <IconButton backgroundColor='beige' 
+          label='장애인 관광숙박'
+          onClick={() => {
+            changeSelect(2)
+          }} />
+        <IconButton backgroundColor='beige' 
+          label='장애인 관광음식점'
+          onClick={() => {
+            changeSelect(3)
+          }}/>
+      </IconContainer>
+      <ListContainer>
+        <DataList></DataList>
       </ListContainer>
     </Container>
   )
