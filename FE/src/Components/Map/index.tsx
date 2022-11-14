@@ -44,21 +44,10 @@ const reducer = (state: any, action: Action) => {
   }
 }
 
+  let array12: any = [];
+  let array23: any = [];
+
 const Map = () => {
-
-  const fetchData = async () => {
-    try {
-      const res = await axios.get('https://localhost:8080/');
-      console.log(res.data);
-    } catch (e) {
-      console.log(e);
-    }
-    finally {console.log('실행')}
-  }
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   /** 내가 있는 현재 위치 */
   const [myLocation, setMyLocation] = useState<{latitude: number; longitude: number} | string>(``);
@@ -259,6 +248,40 @@ const Map = () => {
     }
   }, [select, state1, state2, state3, createArray])
 
+
+  // 서버에서 데이터 받기
+  const fetchData = async () => {
+    try {
+      const res = await axios.get('/api');
+      array12 = res.data;
+      console.log(array12);
+    } catch (e) {
+      console.log(e);
+    }
+    finally {console.log('실행')}
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const sdf = () => {
+    for(let i=0; i<array12.length; i++) {
+      naver.maps.Service.geocode({
+        query: array12[i].addr
+      }, function(status, response) {
+        if(status === naver.maps.Service.Status.ERROR) {
+          console.log('오류');
+        }
+        array23[i] = response.v2.addresses[0];
+      })
+    }
+  }
+
+  const dfg = () => {
+    console.log(array23);
+  }
+
   /** 지도 로딩 시(현재 위치 찾는 중)에 화면 렌더링 */
   if(typeof myLocation === 'string') 
   return (
@@ -277,6 +300,8 @@ const Map = () => {
         <Button backgroundColor='beige' onClick={() => {
           searchAddress()
           }} />
+          <Button backgroundColor='beige' onClick={() => sdf()} />
+          <Button backgroundColor='beige' onClick={() => dfg()} />
       </SearchContainer>
       <MapContainer>
         <div id="map" style={{minHeight: '600px',}}></div>
