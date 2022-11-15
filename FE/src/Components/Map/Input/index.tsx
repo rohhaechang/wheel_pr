@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { KeyboardEventHandler } from 'react';
 import styled from 'styled-components';
 
 interface Props {
   readonly placeholder?: string,
   readonly onChange?: (text: string) => void;
+  readonly onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
 const InputBox = styled.input`
@@ -17,7 +18,7 @@ const InputBox = styled.input`
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 `;
 
-export const Input = ({placeholder, onChange}: Props) => {
+export const Input = ({placeholder, onChange, onKeyDown}: Props) => {
   return (
     <InputBox 
       placeholder={placeholder}
@@ -26,6 +27,7 @@ export const Input = ({placeholder, onChange}: Props) => {
           onChange(e.target.value);
         }
       }}
+      onKeyDown={onKeyDown}
       />
   )
 }

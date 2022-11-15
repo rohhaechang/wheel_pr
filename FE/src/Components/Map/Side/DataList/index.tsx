@@ -1,7 +1,10 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components';
+import {darken} from 'polished'
+
 import { SideContext } from '../../../../Contexts/Side';
 import { PublicDataContext } from '../../../../Contexts/publicData';
+
 
 interface Props {
   label?: Array<any>
@@ -58,6 +61,14 @@ const Label = styled.button`
   flex-basis: 80px;
   font-size: 16px;
   border-bottom: 1px solid black;
+  background-color: white;
+  cursor: pointer;
+  &:hover {
+    background-color: ${(darken(0.1, 'white'))};
+  }
+  &:active {
+    box-shadow: inset 5px 5px 10px rgba(0, 0, 0, 0.2);
+  }
 `;
 
 export default DataList;

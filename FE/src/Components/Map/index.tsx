@@ -1,6 +1,7 @@
-import React, {useEffect, useRef, useState, useContext} from 'react';
+import React, {useEffect, useRef, useState, useContext, KeyboardEventHandler} from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
+import {MdRefresh} from 'react-icons/md';
 
 import { Button } from './Button';
 import { Input } from './Input';
@@ -19,7 +20,7 @@ const Map = () => {
   /** side에서 시작하는 전역 상태 */
   const {select} = useContext(SideContext);
   /** 공공데이터를 담은 전역 상태 */
-  const {data1, data2, data3, changeData1, changeData2, changeData3} = useContext(PublicDataContext);
+  const {data1, data2, data3, markerD1, markerD2, markerD3, changeData1, changeData2, changeData3, changeMarkerD1, changeMarkerD2, changeMarkerD3} = useContext(PublicDataContext);
   /** 지도를 담은 ref 객체 */
   const mapElement = useRef<HTMLElement | null | any>(null);
   /** 지도의 처음, 검색 시 마커를 담은 ref 객체 */
@@ -28,6 +29,11 @@ const Map = () => {
   const dataMarkerRef = useRef<any | null>(null);
   /** 선택된 마커를 담은 ref 객체 */
   const selectedMarker = useRef<any | null>(null);
+
+  /** 사이드에 뜨는 마커를 담은 배열 */
+  let array1: any[] = [];
+  let array2: any[] = [];
+  let array3: any[] = [];
 
   /** 주소 검색 */
   const searchAddress = async () => {
@@ -51,7 +57,6 @@ const Map = () => {
         const mapLatLng = new naver.maps.LatLng(Number(response.v2.addresses[0].y), Number(response.v2.addresses[0].x));
         mapElement.current.panTo(mapLatLng, {duration: 400});
       })
-      setSelectedMarker(markerRef.current);
       let infowindow = new naver.maps.InfoWindow({
         content: search,
         disableAnchor: true,
@@ -75,6 +80,221 @@ const Map = () => {
       longitude: 127.0276188,
     })
   }
+
+  /** select(전역 변수) 변화 시 마커 생성 */
+  const selectMarker = (a: number | undefined) => {
+    if(a !== undefined) {
+      let mapBounds = mapElement.current.getBounds();
+      if(a === 1) {
+        if(!data1[0].marker){
+          data1.map((element: any) => {
+            if(element.y !== null && element.x !== null) {
+              dataMarkerRef.current = new naver.maps.Marker({
+                position: new naver.maps.LatLng(Number(element.y), Number(element.x)),
+                map: mapElement.current,
+              })
+              naver.maps.Event.addListener(dataMarkerRef.current, 'click', () => {
+                const mapLatLng = new naver.maps.LatLng(Number(element.y), Number(element.x));
+                mapElement.current.panTo(mapLatLng, {duration: 400});
+              })
+              element.marker = dataMarkerRef.current;
+              let position = dataMarkerRef.current.getPosition();
+              if(!mapBounds.hasLatLng(position)) {
+                dataMarkerRef.current.setMap(null);
+              } else {
+                array1.push(element);
+              }
+            }
+            else {
+              console.log('데이터 없음')
+            }
+          })
+          removeMarker(1);
+          changeMarkerD1(array1);
+        }
+        else {
+          data1.forEach((e) => {
+            if(e.y !== null) {
+              let position = e.marker.getPosition();
+              if(mapBounds.hasLatLng(position)) {
+                e.marker.setMap(mapElement.current);
+                array1.push(e);
+              }
+            }
+          })
+          removeMarker(1);
+          changeMarkerD1(array1);
+        }
+      }
+      if(a === 2) {
+        if(!data2[0].marker) {
+          data2.map((element: any) => {
+            if(element.y !== null && element.x !== null) {
+              dataMarkerRef.current = new naver.maps.Marker({
+                position: new naver.maps.LatLng(Number(element.y), Number(element.x)),
+                map: mapElement.current,
+              })
+              naver.maps.Event.addListener(dataMarkerRef.current, 'click', () => {
+                const mapLatLng = new naver.maps.LatLng(Number(element.y), Number(element.x));
+                mapElement.current.panTo(mapLatLng, {duration: 400});
+              })
+              element.marker = dataMarkerRef.current;
+              let position = dataMarkerRef.current.getPosition();
+              if(!mapBounds.hasLatLng(position)) {
+                dataMarkerRef.current.setMap(null);
+              } else {
+                array2.push(element);
+              }
+            }
+            else {
+              console.log('데이터 없음')
+            }
+          })
+          removeMarker(2);
+          changeMarkerD2(array2);
+        }
+        else {
+          data2.forEach((e) => {
+            if(e.y !== null) {
+              let position = e.marker.getPosition();
+              if(mapBounds.hasLatLng(position)) {
+                e.marker.setMap(mapElement.current);
+                array2.push(e)
+              }
+            }
+          })
+          removeMarker(2);
+          changeMarkerD2(array2);
+        }
+      }
+      if(a === 3) {
+        if(!data3[0].marker) {
+          data3.map((element: any) => {
+            if(element.y !== null && element.x !== null){
+              dataMarkerRef.current = new naver.maps.Marker({
+                position: new naver.maps.LatLng(Number(element.y), Number(element.x)),
+                map: mapElement.current,
+              })
+              naver.maps.Event.addListener(dataMarkerRef.current, 'click', () => {
+                const mapLatLng = new naver.maps.LatLng(Number(element.y), Number(element.x));
+                mapElement.current.panTo(mapLatLng, {duration: 400});
+              })
+              element.marker = dataMarkerRef.current;
+              let position = dataMarkerRef.current.getPosition();
+              if(!mapBounds.hasLatLng(position)) {
+                dataMarkerRef.current.setMap(null);
+              } else {
+                array3.push(element);
+              }
+            }
+            else {
+              console.log('데이터 없음')
+            }
+          })
+          removeMarker(3);
+          changeMarkerD3(array3);
+        }
+        else {
+          data3.forEach((e) => {
+            if(e.y !== null) {
+              let position = e.marker.getPosition();
+              if(mapBounds.hasLatLng(position)) {
+                e.marker.setMap(mapElement.current);
+                array3.push(e);
+              }
+            }
+          })
+          removeMarker(3);
+          changeMarkerD3(array3);
+        }
+      }    
+    }
+    else console.log('오류');
+  }
+
+  /** select에 따른 마커 제거 */
+  const removeMarker = (a: number) => {
+    if(a === 1) {
+      if(data2[0].marker) {
+        data2.forEach((e) => {
+          if(e.y !== null) {
+            e.marker.setMap(null);
+          }
+        })
+      }
+      if(data3[0].marker) {
+        data3.forEach((e) => {
+          if(e.y !== null) {
+            e.marker.setMap(null);
+          }
+        })
+      }
+      changeMarkerD2([]);
+      changeMarkerD3([]);
+    }
+    if(a === 2) {
+      if(data1[0].marker) {
+        data1.forEach((e) => {
+          if(e.y !== null) {
+            e.marker.setMap(null);
+          }
+        })
+      }
+      if(data3[0].marker) {
+        data3.forEach((e) => {
+          if(e.y !== null) {
+            e.marker.setMap(null);
+          }
+        })
+      }
+      changeMarkerD1([]);
+      changeMarkerD3([]);
+    }
+    if(a === 3) {
+      if(data1[0].marker) {
+        data1.forEach((e) => {
+          if(e.y !== null) {
+            e.marker.setMap(null);
+          }
+        })
+      }
+      if(data2[0].marker) {
+        data2.forEach((e) => {
+          if(e.y !== null) {
+            e.marker.setMap(null);
+          }
+        })
+      }
+      changeMarkerD1([]);
+      changeMarkerD2([]);
+    }
+  }
+
+  /** 현재 지도에서 다시 검색하기
+   * 왜 잘 작동하는지 모르겠다...
+   */
+  const remarking = (a: number | undefined) => {
+    selectMarker(a);
+  }
+
+  /** 서버에서 공공데이터 받아오기 */
+  const getData = async (a?: string) => {
+    try {
+      const res = await axios.get(`/api${a}`);
+      if(a === '1') {
+        changeData1(res.data);
+      }
+      if(a === '2') {
+        changeData2(res.data);
+      }
+      if(a === '3') {
+        changeData3(res.data);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+  // ex) res.data[].x
 
   /** 현재 위치를 추적 */
   useEffect(() => {
@@ -110,139 +330,27 @@ const Map = () => {
         const mapLatLng = new naver.maps.LatLng(myLocation.latitude, myLocation.longitude);
         mapElement.current.panTo(mapLatLng, {duration: 400});
       })
-      setSelectedMarker(markerRef.current);
     }
   }, [myLocation]);
 
-  /** 선택된 마커에 하이라이트를 주는 함수 - 실행 안 됨*/
-  function setSelectedMarker(marker: any) {
-  naver.maps.Event.addListener(marker, 'click', (e: any) => {
-    if(!selectedMarker.current ||(selectedMarker.current !== marker)) {
-      if(!!selectedMarker.current) {
-        selectedMarker.current.setIcon({
-        url: '../../asset/markericon.png',
-        size: new naver.maps.Size(50, 58),
-        origin: new naver.maps.Point(0, 0),
-        anchor: new naver.maps.Point(25, 58),
-        })
-      }
-      marker.setIcon({
-        url: '../../asset/markericon.png',
-        size: new naver.maps.Size(50, 58),
-        origin: new naver.maps.Point(0, 0),
-        anchor: new naver.maps.Point(25, 58),
-      })
-      selectedMarker.current = marker
-    }
-  })
-  }
-
-  /** select(전역 변수) 변화 시 마커 생성 */
-  const selectMarker = (a: number | undefined) => {
-    if(a !== undefined) {
-      if(a === 1) {
-        data1.map((element: any) => {
-          if(element.y !== null && element.x !== null) {
-            dataMarkerRef.current = new naver.maps.Marker({
-              position: new naver.maps.LatLng(Number(element.y), Number(element.x)),
-              map: mapElement.current,
-            })
-            naver.maps.Event.addListener(dataMarkerRef.current, 'click', () => {
-              const mapLatLng = new naver.maps.LatLng(Number(element.y), Number(element.x));
-              mapElement.current.panTo(mapLatLng, {duration: 400});
-            })
-            setSelectedMarker(dataMarkerRef.current);
-            element.marker = dataMarkerRef.current;
-          }
-          else {
-            console.log('데이터 없음')
-          }
-        })
-      }
-      if(a === 2) {
-        data2.map((element: any) => {
-          if(element.y !== null && element.x !== null) {
-            dataMarkerRef.current = new naver.maps.Marker({
-              position: new naver.maps.LatLng(Number(element.y), Number(element.x)),
-              map: mapElement.current,
-            })
-            naver.maps.Event.addListener(dataMarkerRef.current, 'click', () => {
-              const mapLatLng = new naver.maps.LatLng(Number(element.y), Number(element.x));
-              mapElement.current.panTo(mapLatLng, {duration: 400});
-            })
-            setSelectedMarker(dataMarkerRef.current);
-            element.marker = dataMarkerRef.current;
-          }
-          else {
-            console.log('데이터 없음')
-          }
-        })
-      }
-      if(a === 3) {
-        data3.map((element: any) => {
-          if(element.y !== null && element.x !== null){
-            dataMarkerRef.current = new naver.maps.Marker({
-              position: new naver.maps.LatLng(Number(element.y), Number(element.x)),
-              map: mapElement.current,
-            })
-            naver.maps.Event.addListener(dataMarkerRef.current, 'click', () => {
-              const mapLatLng = new naver.maps.LatLng(Number(element.y), Number(element.x));
-              mapElement.current.panTo(mapLatLng, {duration: 400});
-            })
-            setSelectedMarker(dataMarkerRef.current);
-            element.marker = dataMarkerRef.current;
-          }
-          else {
-            console.log('데이터 없음')
-          }
-        })
-      }    
-    }
-    else console.log('오류');
-  }
-
+  /** select에 따른 마커 생성 */
   useEffect(() => {
     selectMarker(select);
   }, [select]);
 
-  // const postData = () => {
-  //   for(let i=0; i<array12.length; i++) {
-  //     naver.maps.Service.geocode({
-  //       query: array12[i].addr
-  //     }, function(status, response) {
-  //       if(status === naver.maps.Service.Status.ERROR) {
-  //         console.log('오류');
-  //       }
-  //       array23[i] = response.v2.addresses[0];
-  //     })
-  //   }
-  // }
-
-  /** 서버에서 공공데이터 받아오기 */
-
-  const getData = async (a?: string) => {
-    try {
-      const res = await axios.get(`/api${a}`);
-      if(a === '1') {
-        changeData1(res.data);
-      }
-      if(a === '2') {
-        changeData2(res.data);
-      }
-      if(a === '3') {
-        changeData3(res.data);
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  }
-  // ex) res.data[].x
-
+  /** 서버에서 공공데이터 받아오는 useEffect */
   useEffect(() => {
     getData('1');
     getData('2');
     getData('3');
   }, []);
+
+  /** 엔터 누를 시 검색과 같은 효과 */
+  const KeyDownHandler = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if(event.code === "Enter") {
+      searchAddress();
+    }
+  }
 
   /** 지도 로딩 시(현재 위치 찾는 중)에 화면 렌더링 */
   if(typeof myLocation === 'string') 
@@ -258,10 +366,11 @@ const Map = () => {
     <>
     <MapContents>
       <SearchContainer>
-        <Input placeholder='검색' onChange={(text) => setSearch(text)}/>
+        <Input onKeyDown={KeyDownHandler} placeholder='검색' onChange={(text) => setSearch(text)}/>
         <Button backgroundColor='beige' onClick={() => {
           searchAddress()
           }} />
+        <ReButton onClick={() => remarking(select)}><MdRefresh size='18' style={{marginRight: '5px', marginLeft: '-4px', marginBottom: '-4px' }}/>현 지도에서 검색</ReButton>
       </SearchContainer>
       <MapContainer>
         <div id="map" style={{minHeight: '600px',}}></div>
@@ -298,6 +407,20 @@ const MapContainer = styled.div`
 
 const SideContents = styled.div`
   flex: 1;
+`;
+
+const ReButton = styled.button`
+  width: 150px;
+  height: 40px;
+  z-index: 3;
+  margin-top: 1rem;
+  border-radius: 15px;
+  margin-left: 20%;
+  border: none;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  background-color: white;
+  color: #0066ff;
+  cursor: pointer;
 `;
 
 export default Map;

@@ -8,7 +8,7 @@ import { PublicDataContext } from '../../../Contexts/publicData';
 
 const Side = () => {
   const {select, changeSelect} = useContext(SideContext);
-  const {data1, data2, data3} = useContext(PublicDataContext);
+  const {markerD1, markerD2, markerD3} = useContext(PublicDataContext);
   if(select == 1)
   return (
     <Container>
@@ -30,7 +30,7 @@ const Side = () => {
           }}/>
       </IconContainer>
       <ListContainer>
-        <DataList label={data1}></DataList>
+        <DataList label={markerD1}></DataList>
       </ListContainer>
     </Container>
   )
@@ -55,7 +55,7 @@ const Side = () => {
           }}/>
       </IconContainer>
       <ListContainer>
-        <DataList label={data2}></DataList>
+        <DataList label={markerD2}></DataList>
       </ListContainer>
     </Container>
   )
@@ -80,7 +80,7 @@ const Side = () => {
           }}/>
       </IconContainer>
       <ListContainer>
-        <DataList label={data3}></DataList>
+        <DataList label={markerD3}></DataList>
       </ListContainer>
     </Container>
   )
@@ -132,6 +132,9 @@ const ListContainer = styled.div`
   box-sizing: border-box;
   border: 1px solid black;
   overflow-y: scroll;
+  ::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 export default Side;
