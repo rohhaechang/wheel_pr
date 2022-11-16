@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState, useContext, useCallback} from 'react';
+import React, {useEffect, useRef, useState, useContext} from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
 import {MdRefresh} from 'react-icons/md';
@@ -10,7 +10,6 @@ import { SideContext } from '../../Contexts/Side';
 import { PublicDataContext } from '../../Contexts/publicData';
 
 const Map = () => {
-
   /** 내가 있는 현재 위치 */
   const [myLocation, setMyLocation] = useState<{latitude: number; longitude: number} | string>(``);
   /** 검색 주소 */
@@ -92,22 +91,18 @@ const Map = () => {
                 map: mapElement.current,
               })
               let contentString = [
-                `<div>`,
-                `<h3>${element.sisulname}</h3>`,
-                `<p>${element.addr}</p>`,
-                `<p>${element.tel}</p>`,
-                `<p><a href="${element.homepage}">${element.homepage}</a></p>`,
+                `<div style="padding: 0 20px">`,
+                `<h2 style="text-align: center">${element.sisulname}</h2>`,
+                `<pre>${element.addr}<br>`,
+                `tel: ${element.tel}</pre>`,
                 `</div>`
               ].join(``);
               let infowindow = new naver.maps.InfoWindow({
                 content: contentString,
                 backgroundColor: "#eee",
                 borderColor: "#000000",
-                borderWidth: 5,
-                anchorSize: new naver.maps.Size(30, 30),
-                anchorSkew: true,
-                anchorColor: "#eee",
-                pixelOffset: new naver.maps.Point(20, -20)
+                borderWidth: 2,
+                anchorColor: "#eee"
               })
               naver.maps.Event.addListener(dataMarkerRef.current, 'click', () => {
                 const mapLatLng = new naver.maps.LatLng(Number(element.y), Number(element.x));
@@ -159,22 +154,18 @@ const Map = () => {
                 map: mapElement.current,
               })
               let contentString = [
-                `<div>`,
-                `<h3>${element.sisulname}</h3>`,
-                `<p>${element.addr}</p>`,
-                `<p>${element.tel}</p>`,
-                `<p><a href="${element.homepage}">${element.homepage}</a></p>`,
+                `<div style="padding: 5px">`,
+                `<h2 style="text-align: center">${element.sisulname}</h2>`,
+                `<pre>${element.addr}<br>`,
+                `tel: ${element.tel}</pre>`,
                 `</div>`
               ].join(``);
               let infowindow = new naver.maps.InfoWindow({
                 content: contentString,
                 backgroundColor: "#eee",
                 borderColor: "#000000",
-                borderWidth: 5,
-                anchorSize: new naver.maps.Size(30, 30),
-                anchorSkew: true,
-                anchorColor: "#eee",
-                pixelOffset: new naver.maps.Point(20, -20)
+                borderWidth: 2,
+                anchorColor: "#eee"
               })
               naver.maps.Event.addListener(dataMarkerRef.current, 'click', () => {
                 const mapLatLng = new naver.maps.LatLng(Number(element.y), Number(element.x));
@@ -225,22 +216,18 @@ const Map = () => {
                 map: mapElement.current,
               })
               let contentString = [
-                `<div style="padding: 10px">`,
-                `<h3>${element.sisulname}</h3>`,
-                `<p>${element.addr}</p>`,
-                `<p>${element.tel}</p>`,
-                `<p><a href="${element.homepage}">${element.homepage}</a></p>`,
+                `<div style="padding: 5px">`,
+                `<h2 style="text-align: center">${element.sisulname}</h2>`,
+                `<pre>${element.addr}<br>`,
+                `tel: ${element.tel}</pre>`,
                 `</div>`
               ].join(``);
               let infowindow = new naver.maps.InfoWindow({
                 content: contentString,
                 backgroundColor: "#eee",
                 borderColor: "#000000",
-                borderWidth: 5,
-                anchorSize: new naver.maps.Size(15, 15),
-                anchorSkew: true,
-                anchorColor: "#eee",
-                pixelOffset: new naver.maps.Point(20, -20)
+                borderWidth: 2,
+                anchorColor: "#eee"
               })
               naver.maps.Event.addListener(dataMarkerRef.current, 'click', () => {
                 const mapLatLng = new naver.maps.LatLng(Number(element.y), Number(element.x));
@@ -354,7 +341,7 @@ const Map = () => {
   /** 서버에서 공공데이터 받아오기 */
   const getData = async (a?: string) => {
     try {
-      const res = await axios.get(`/api${a}`);
+      const res = await axios.get(`api${a}`);
       if(a === '1') {
         changeData1(res.data);
       }

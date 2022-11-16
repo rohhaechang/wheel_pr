@@ -11,7 +11,10 @@ app.use(express.json({limit: '1000mb'}));
 var cors = require('cors');
 app.use(bodyParser.urlencoded({limit: '1000mb', extended: false}))
 
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  credential: 'true'
+}));
 
 app.listen(8080, function() {
   console.log('listening on 8080')
