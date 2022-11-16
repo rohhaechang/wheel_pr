@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState, useContext, KeyboardEventHandler} from 'react';
+import React, {useEffect, useRef, useState, useContext, useCallback} from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
 import {MdRefresh} from 'react-icons/md';
@@ -20,15 +20,13 @@ const Map = () => {
   /** side에서 시작하는 전역 상태 */
   const {select} = useContext(SideContext);
   /** 공공데이터를 담은 전역 상태 */
-  const {data1, data2, data3, markerD1, markerD2, markerD3, changeData1, changeData2, changeData3, changeMarkerD1, changeMarkerD2, changeMarkerD3} = useContext(PublicDataContext);
+  const {data1, data2, data3, changeData1, changeData2, changeData3, changeMarkerD1, changeMarkerD2, changeMarkerD3} = useContext(PublicDataContext);
   /** 지도를 담은 ref 객체 */
   const mapElement = useRef<HTMLElement | null | any>(null);
   /** 지도의 처음, 검색 시 마커를 담은 ref 객체 */
   const markerRef = useRef<any | null>(null);
   /** 데이터의 마커를 담은 ref 객체 */
   const dataMarkerRef = useRef<any | null>(null);
-  /** 선택된 마커를 담은 ref 객체 */
-  const selectedMarker = useRef<any | null>(null);
 
   /** 사이드에 뜨는 마커를 담은 배열 */
   let array1: any[] = [];
@@ -80,7 +78,7 @@ const Map = () => {
       longitude: 127.0276188,
     })
   }
-
+  
   /** select(전역 변수) 변화 시 마커 생성 */
   const selectMarker = (a: number | undefined) => {
     if(a !== undefined) {
@@ -93,11 +91,37 @@ const Map = () => {
                 position: new naver.maps.LatLng(Number(element.y), Number(element.x)),
                 map: mapElement.current,
               })
+              let contentString = [
+                `<div>`,
+                `<h3>${element.sisulname}</h3>`,
+                `<p>${element.addr}</p>`,
+                `<p>${element.tel}</p>`,
+                `<p><a href="${element.homepage}">${element.homepage}</a></p>`,
+                `</div>`
+              ].join(``);
+              let infowindow = new naver.maps.InfoWindow({
+                content: contentString,
+                backgroundColor: "#eee",
+                borderColor: "#000000",
+                borderWidth: 5,
+                anchorSize: new naver.maps.Size(30, 30),
+                anchorSkew: true,
+                anchorColor: "#eee",
+                pixelOffset: new naver.maps.Point(20, -20)
+              })
               naver.maps.Event.addListener(dataMarkerRef.current, 'click', () => {
                 const mapLatLng = new naver.maps.LatLng(Number(element.y), Number(element.x));
                 mapElement.current.panTo(mapLatLng, {duration: 400});
               })
               element.marker = dataMarkerRef.current;
+              // 현재 마커를 클릭 시 infowindow가 나오게 한다. 마커를 dataMarkerRef.current로 할 시에 가장 최근의 ref를 기점으로 하여 선택되므로, 이 함수가 나오기 이전에 element에 마커를 집어넣어 element.marker로 해당하는 마커를 찾도록 하였다.
+              naver.maps.Event.addListener(dataMarkerRef.current, 'click', () => {
+                if(infowindow.getMap())  {
+                  infowindow.close();
+                } else {
+                  infowindow.open(mapElement.current, element.marker)
+                }
+              })
               let position = dataMarkerRef.current.getPosition();
               if(!mapBounds.hasLatLng(position)) {
                 dataMarkerRef.current.setMap(null);
@@ -134,11 +158,36 @@ const Map = () => {
                 position: new naver.maps.LatLng(Number(element.y), Number(element.x)),
                 map: mapElement.current,
               })
+              let contentString = [
+                `<div>`,
+                `<h3>${element.sisulname}</h3>`,
+                `<p>${element.addr}</p>`,
+                `<p>${element.tel}</p>`,
+                `<p><a href="${element.homepage}">${element.homepage}</a></p>`,
+                `</div>`
+              ].join(``);
+              let infowindow = new naver.maps.InfoWindow({
+                content: contentString,
+                backgroundColor: "#eee",
+                borderColor: "#000000",
+                borderWidth: 5,
+                anchorSize: new naver.maps.Size(30, 30),
+                anchorSkew: true,
+                anchorColor: "#eee",
+                pixelOffset: new naver.maps.Point(20, -20)
+              })
               naver.maps.Event.addListener(dataMarkerRef.current, 'click', () => {
                 const mapLatLng = new naver.maps.LatLng(Number(element.y), Number(element.x));
                 mapElement.current.panTo(mapLatLng, {duration: 400});
               })
               element.marker = dataMarkerRef.current;
+              naver.maps.Event.addListener(dataMarkerRef.current, 'click', () => {
+                if(infowindow.getMap())  {
+                  infowindow.close();
+                } else {
+                  infowindow.open(mapElement.current, element.marker);
+                }
+              })
               let position = dataMarkerRef.current.getPosition();
               if(!mapBounds.hasLatLng(position)) {
                 dataMarkerRef.current.setMap(null);
@@ -175,11 +224,36 @@ const Map = () => {
                 position: new naver.maps.LatLng(Number(element.y), Number(element.x)),
                 map: mapElement.current,
               })
+              let contentString = [
+                `<div style="padding: 10px">`,
+                `<h3>${element.sisulname}</h3>`,
+                `<p>${element.addr}</p>`,
+                `<p>${element.tel}</p>`,
+                `<p><a href="${element.homepage}">${element.homepage}</a></p>`,
+                `</div>`
+              ].join(``);
+              let infowindow = new naver.maps.InfoWindow({
+                content: contentString,
+                backgroundColor: "#eee",
+                borderColor: "#000000",
+                borderWidth: 5,
+                anchorSize: new naver.maps.Size(15, 15),
+                anchorSkew: true,
+                anchorColor: "#eee",
+                pixelOffset: new naver.maps.Point(20, -20)
+              })
               naver.maps.Event.addListener(dataMarkerRef.current, 'click', () => {
                 const mapLatLng = new naver.maps.LatLng(Number(element.y), Number(element.x));
                 mapElement.current.panTo(mapLatLng, {duration: 400});
               })
               element.marker = dataMarkerRef.current;
+              naver.maps.Event.addListener(dataMarkerRef.current, 'click', () => {
+                if(infowindow.getMap())  {
+                  infowindow.close();
+                } else {
+                  infowindow.open(mapElement.current, element.marker)
+                }
+              })
               let position = dataMarkerRef.current.getPosition();
               if(!mapBounds.hasLatLng(position)) {
                 dataMarkerRef.current.setMap(null);
@@ -210,7 +284,7 @@ const Map = () => {
       }    
     }
     else console.log('오류');
-  }
+  };
 
   /** select에 따른 마커 제거 */
   const removeMarker = (a: number) => {
@@ -293,7 +367,7 @@ const Map = () => {
     } catch (e) {
       console.log(e);
     }
-  }
+  };
   // ex) res.data[].x
 
   /** 현재 위치를 추적 */
